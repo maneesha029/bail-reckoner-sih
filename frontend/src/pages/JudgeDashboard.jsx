@@ -200,11 +200,24 @@ function AuditHistory({ entries }) {
   );
 }
 
+// Looks at the most recent audit entry (by timestamp, not array order, since
+// the API's ordering isn't guaranteed) and decides whether a grant/deny
+// decision is currently "standing" on this case. Reason strings are the
+// same labels takeAction() writes: "Bail granted", "Bail denied", or
+// "Sent back for review" (each optionally followed by ". <note>").
+function deriveDecisionMade(entries) {
+  if (!entries || entries.length === 0) return false;
+  const latest = entries.reduce((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? a : b));
+  const reason = latest.action_payload?.reason || "";
+  return reason.startsWith("Bail granted") || reason.startsWith("Bail denied");
+}
+
 export default function JudgeDashboard({ token, userId, role }) {
   const [tab, setTab] = useState("reference");
   const [caseId, setCaseId] = useState("");
   const [result, setResult] = useState(null);
   const [auditEntries, setAuditEntries] = useState(null);
+  const [decisionMade, setDecisionMade] = useState(false);
   const [loading, setLoading] = useState(false);
   const [decisionInFlight, setDecisionInFlight] = useState(false);
   const [note, setNote] = useState("");
@@ -213,9 +226,12 @@ export default function JudgeDashboard({ token, userId, role }) {
   const refreshAuditLog = async (id) => {
     try {
       const log = await getAuditLog(id, token);
-      setAuditEntries(log.data || []);
+      const entries = log.data || [];
+      setAuditEntries(entries);
+      setDecisionMade(deriveDecisionMade(entries));
     } catch {
       setAuditEntries([]);
+      setDecisionMade(false);
     }
   };
 
@@ -248,7 +264,10 @@ export default function JudgeDashboard({ token, userId, role }) {
 
   // The real backend has no formal "grant/deny/send-back" field - /override
   // takes a free-text reason. We prefix it so it's still clearly a decision
-  // when read back in the audit trail.
+  // when read back in the audit trail. refreshAuditLog() re-derives
+  // decisionMade from whatever the server just recorded, rather than
+  // trusting the label locally - so a failed write can't leave the buttons
+  // out of sync with what's actually on the case.
   const takeAction = async (label) => {
     setDecisionInFlight(true);
     setError("");
@@ -349,6 +368,13 @@ export default function JudgeDashboard({ token, userId, role }) {
 
                 <section style={{ borderTop: `1px solid ${TOKENS.rule}`, paddingTop: 20, marginBottom: 24 }}>
                   <Eyebrow>Record a decision</Eyebrow>
+
+                  {decisionMade && (
+                    <p style={{ fontSize: 12.5, color: TOKENS.inkSoft, fontStyle: "italic", marginBottom: 12 }}>
+                      A decision is already recorded on this case. Send it back for review to change it.
+                    </p>
+                  )}
+
                   <input
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
@@ -360,12 +386,16 @@ export default function JudgeDashboard({ token, userId, role }) {
                     }}
                   />
                   <div style={{ display: "flex", gap: 10 }}>
-                    <ActionButton variant="primary" disabled={decisionInFlight} onClick={() => takeAction("Bail granted")}>
-                      Grant Bail
-                    </ActionButton>
-                    <ActionButton variant="danger" disabled={decisionInFlight} onClick={() => takeAction("Bail denied")}>
-                      Deny
-                    </ActionButton>
+                    {!decisionMade && (
+                      <>
+                        <ActionButton variant="primary" disabled={decisionInFlight} onClick={() => takeAction("Bail granted")}>
+                          Grant Bail
+                        </ActionButton>
+                        <ActionButton variant="danger" disabled={decisionInFlight} onClick={() => takeAction("Bail denied")}>
+                          Deny
+                        </ActionButton>
+                      </>
+                    )}
                     <ActionButton variant="neutral" disabled={decisionInFlight} onClick={() => takeAction("Sent back for review")}>
                       Send Back for Review
                     </ActionButton>

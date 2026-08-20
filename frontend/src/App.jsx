@@ -4,39 +4,82 @@ import Login from "./pages/Login";
 import LegalAidDashboard from "./pages/LegalAidDashboard";
 import JudgeDashboard from "./pages/JudgeDashboard";
 import UndertrialView from "./pages/UndertrialView";
-import { TOKENS, FONTS } from "./components/designSystem";
+import { TOKENS, FONTS, WavingFlag } from "./components/designSystem";
 
-function BackBar({ onBack, label, username }) {
+// Same visual language as Landing.jsx's own Header (wordmark + waving flag,
+// sticky, light background) rather than the old dark BackBar. SWITCH ROLE
+// sits where Landing's LOGIN button sits, since this is effectively the
+// signed-in equivalent of that same top-right action slot.
+function Header({ label, username, onSwitchRole }) {
   return (
-    <div style={{
-      background: TOKENS.ink, padding: "0px 24px",
-      display: "flex", alignItems: "center", gap: 12,
-    }}>
-      <button
-        onClick={onBack}
-        style={{
-          background: "none", border: "none", color: TOKENS.paper,
-          fontFamily: FONTS.mono, fontSize: 11.5, letterSpacing: "0.06em",
-          cursor: "pointer", opacity: 0.85, padding: 0,
-        }}
-      >
-        ← SWITCH ROLE
-      </button>
-      <span style={{
-        fontFamily: FONTS.mono, fontSize: 11, color: TOKENS.paper,
-        opacity: 0.5, letterSpacing: "0.06em",
-      }}>
-        {label}
-      </span>
-      {username && (
-        <span style={{
-          marginLeft: "auto", fontFamily: FONTS.mono, fontSize: 11,
-          color: TOKENS.paper, opacity: 0.5, letterSpacing: "0.06em",
-        }}>
-          SIGNED IN AS {username.toUpperCase()}
+    <header
+      style={{
+        background: TOKENS.paper,
+        borderBottom: `1px solid ${TOKENS.rule}`,
+        padding: "16px 32px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <span style={{ fontFamily: FONTS.display, fontSize: 19, fontWeight: 700, color: TOKENS.navy }}>
+          Bail-Reckoner
         </span>
-      )}
-    </div>
+        <WavingFlag height={30} idSuffix="App" />
+        {label && (
+          <span
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              letterSpacing: "0.08em",
+              color: TOKENS.inkSoft,
+              textTransform: "uppercase",
+              marginLeft: 8,
+              paddingLeft: 12,
+              borderLeft: `1px solid ${TOKENS.rule}`,
+            }}
+          >
+            {label}
+          </span>
+        )}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        {username && (
+          <span
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: TOKENS.inkSoft,
+              letterSpacing: "0.05em",
+            }}
+          >
+            SIGNED IN AS {username.toUpperCase()}
+          </span>
+        )}
+        <button
+          onClick={onSwitchRole}
+          style={{
+            fontFamily: FONTS.mono,
+            fontSize: 13,
+            fontWeight: 500,
+            letterSpacing: "0.03em",
+            color: TOKENS.paper,
+            background: TOKENS.navy,
+            border: "none",
+            borderRadius: 2,
+            padding: "10px 22px",
+            cursor: "pointer",
+          }}
+        >
+          SWITCH ROLE
+        </button>
+      </div>
+    </header>
   );
 }
 
@@ -75,8 +118,6 @@ export default function App() {
     // Landing renders two separate entry points: the role cards
     // (onSelectRole) AND the top-right LOGIN button (onLogin) - both need
     // to land on the Login screen, so both props have to be passed here.
-    // Only onSelectRole was wired before, which is why the LOGIN button
-    // did nothing when clicked.
     return <Landing onSelectRole={() => setShowLogin(true)} onLogin={() => setShowLogin(true)} />;
   }
 
@@ -107,7 +148,7 @@ export default function App() {
 
   return (
     <div>
-      <BackBar onBack={handleSwitchRole} label={current.label} username={username} />
+      <Header label={current.label} username={username} onSwitchRole={handleSwitchRole} />
       {current.component}
     </div>
   );
