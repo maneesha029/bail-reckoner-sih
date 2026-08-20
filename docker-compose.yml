@@ -1,0 +1,108 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: bail_reckoner
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d bail_reckoner"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  chroma:
+    image: chromadb/chroma:latest
+    ports: ["8010:8000"]
+
+  eligibility-engine:
+    build: ./services/eligibility-engine
+    ports: ["8001:8001"]
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./shared_schemas/audit_client.py:/app/audit_client.py
+
+  precedent-engine:
+    build: ./services/precedent-engine
+    ports: ["8002:8002"]
+    env_file: .env
+    depends_on: [chroma]
+    volumes:
+      - ./shared_schemas/audit_client.py:/app/audit_client.py
+      - ./shared_schemas/models.py:/app/models.py
+
+  compliance-engine:
+    build: 
+      context: .
+      dockerfile: ./services/compliance-engine/Dockerfile
+    ports: ["8003:8003"]
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./shared_schemas/audit_client.py:/app/audit_client.py
+
+  trust-access-layer:
+    build: ./services/trust-access-layer
+    ports: ["8004:8004"]
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  monitoring-engine:
+    build: ./services/monitoring-engine
+    ports: ["8005:8005"]
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      eligibility-engine:
+        condition: service_started
+    volumes:
+      - ./shared_schemas/audit_client.py:/app/audit_client.py
+
+  monitoring-scheduler:
+    build: ./services/monitoring-engine
+    command: celery -A celery_app worker --beat --loglevel=info
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      eligibility-engine:
+        condition: service_started
+      monitoring-engine:
+        condition: service_started
+    volumes:
+      - ./shared_schemas/audit_client.py:/app/audit_client.py
+
+  gateway:
+    build: ./services/gateway
+    ports: ["8000:8000"]
+    env_file: .env
+    depends_on:
+      - eligibility-engine
+      - precedent-engine
+      - compliance-engine
+      - trust-access-layer
+      - monitoring-engine
+
+  frontend:
+    build: ./frontend
+    ports: ["5173:5173"]
+    environment:
+      VITE_GATEWAY_URL: http://localhost:8000
+    depends_on: [gateway]
