@@ -1,9 +1,168 @@
 import { useState } from "react";
 import { checkEligibility, searchPrecedent, getProceduralRequirements, checkBondWaiver, getAuditLog } from "../api/client";
-import { TOKENS, FONTS, CaseSeal, Eyebrow, TabBar, ActionButton, Pill } from "../components/designSystem";
 import RosterTab from "./RosterTab";
 import CalendarTab from "./CalendarTab";
 import IntakeScan from "./IntakeScan";
+
+// ─── Design tokens — identical to Landing.jsx / Login.jsx ───
+const TOKENS = {
+  paper: "#FFFFFF",
+  navy: "#0B3558",
+  navyDeep: "#072941",
+  ink: "#16233A",
+  inkSoft: "#57647A",
+  rule: "#E3E7EC",
+  ruleSoft: "#EEF1F4",
+  saffron: "#FF9933",
+  green: "#0F7A32",
+  gold: "#B8860B",
+  danger: "#B3261E",
+};
+
+const FONTS = {
+  display: "'Fraunces', 'Georgia', serif",
+  body: "'IBM Plex Sans', 'Segoe UI', sans-serif",
+  mono: "'IBM Plex Mono', 'Courier New', monospace",
+};
+
+const FONT_IMPORT_URL =
+  "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap";
+
+// ─── Shared bits (recreated locally to match Landing.jsx's theme — move into ../components/designSystem when ready) ───
+
+function Eyebrow({ children, color = TOKENS.saffron }) {
+  return (
+    <div
+      style={{
+        fontFamily: FONTS.mono,
+        fontSize: 11,
+        letterSpacing: "0.14em",
+        color,
+        textTransform: "uppercase",
+        fontWeight: 500,
+        marginBottom: 8,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Pill({ color = TOKENS.inkSoft, children }) {
+  return (
+    <span
+      style={{
+        fontFamily: FONTS.mono,
+        fontSize: 10.5,
+        letterSpacing: "0.04em",
+        color: TOKENS.paper,
+        background: color,
+        borderRadius: 2,
+        padding: "3px 8px",
+        textTransform: "uppercase",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function ActionButton({ onClick, disabled, children }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        fontFamily: FONTS.mono,
+        fontSize: 13,
+        fontWeight: 500,
+        letterSpacing: "0.03em",
+        color: TOKENS.paper,
+        background: disabled ? TOKENS.inkSoft : TOKENS.navy,
+        border: "none",
+        borderRadius: 2,
+        padding: "11px 22px",
+        cursor: disabled ? "default" : "pointer",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TabBar({ active, onChange, tabs }) {
+  return (
+    <div style={{ display: "flex", gap: 4, marginBottom: 32, borderBottom: `1px solid ${TOKENS.rule}` }}>
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => onChange(t.id)}
+          style={{
+            fontFamily: FONTS.mono,
+            fontSize: 12,
+            letterSpacing: "0.04em",
+            padding: "10px 4px",
+            marginRight: 28,
+            marginBottom: -1,
+            cursor: "pointer",
+            background: "none",
+            border: "none",
+            color: active === t.id ? TOKENS.ink : TOKENS.inkSoft,
+            borderBottom: active === t.id ? `2px solid ${TOKENS.saffron}` : "2px solid transparent",
+          }}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const SEAL_COLORS = {
+  eligible: TOKENS.green,
+  ineligible: TOKENS.danger,
+  pending: TOKENS.gold,
+};
+
+function CaseSeal({ status }) {
+  const color = SEAL_COLORS[status] || TOKENS.inkSoft;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 96, flexShrink: 0 }}>
+      <div
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: "50%",
+          border: `3px solid ${color}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
+        <div style={{ position: "absolute", inset: 5, borderRadius: "50%", border: `1px solid ${color}` }} />
+        <span style={{ fontFamily: FONTS.mono, fontSize: 9, color, letterSpacing: "0.04em", textAlign: "center" }}>
+          {(status || "unknown").slice(0, 3).toUpperCase()}
+        </span>
+      </div>
+      <span
+        style={{
+          fontFamily: FONTS.mono,
+          fontSize: 10.5,
+          color,
+          marginTop: 8,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          textAlign: "center",
+        }}
+      >
+        {status}
+      </span>
+    </div>
+  );
+}
+
+// ─── Page-local components ───
 
 function Docket({ cases, activeId, onSelect }) {
   return (
@@ -16,7 +175,7 @@ function Docket({ cases, activeId, onSelect }) {
           style={{
             display: "block", width: "100%", textAlign: "left", padding: "12px 0",
             borderTop: `1px solid ${TOKENS.rule}`, background: "none", border: "none",
-            borderBottom: c.case_id === activeId ? `2px solid ${TOKENS.ink}` : "none",
+            borderBottom: c.case_id === activeId ? `2px solid ${TOKENS.navy}` : "none",
             cursor: "pointer",
           }}
         >
@@ -47,8 +206,8 @@ function AuditHistory({ entries }) {
           display: "flex", alignItems: "center", gap: 10, padding: "8px 0",
           borderBottom: `1px solid ${TOKENS.rule}`,
         }}>
-          <Pill color={e.actor_role === "judge" ? TOKENS.seal : TOKENS.inkSoft}>{e.actor_role}</Pill>
-          <span style={{ fontSize: 13 }}>{e.action_type.replace(/_/g, " ")}</span>
+          <Pill color={e.actor_role === "judge" ? TOKENS.saffron : TOKENS.inkSoft}>{e.actor_role}</Pill>
+          <span style={{ fontSize: 13, color: TOKENS.ink }}>{e.action_type.replace(/_/g, " ")}</span>
           {e.action_payload?.reason && (
             <span style={{ fontSize: 12, color: TOKENS.inkSoft }}>— {e.action_payload.reason}</span>
           )}
@@ -112,12 +271,14 @@ export default function LegalAidDashboard({ token, userId, role }) {
 
   return (
     <div style={{
-      background: TOKENS.paper, minHeight: "100vh", padding: "40px 48px",
+      background: TOKENS.paper, minHeight: "100vh", padding: "0px 48px 40px",
       fontFamily: FONTS.body, color: TOKENS.ink,
     }}>
-      <header style={{ marginBottom: 28, borderBottom: `1px solid ${TOKENS.rule}`, paddingBottom: 20 }}>
+      <style>{`@import url('${FONT_IMPORT_URL}');`}</style>
+
+      <header style={{ marginBottom: 28, borderBottom: `1px solid ${TOKENS.rule}`, paddingBottom: 20, paddingTop: 20 }}>
         <Eyebrow>Bail Reckoner — Legal Aid Docket</Eyebrow>
-        <h1 style={{ fontFamily: FONTS.display, fontSize: 30, fontWeight: 700, margin: 0 }}>
+        <h1 style={{ fontFamily: FONTS.display, fontSize: 30, fontWeight: 700, margin: 0, color: TOKENS.ink }}>
           Case review
         </h1>
       </header>
@@ -135,12 +296,13 @@ export default function LegalAidDashboard({ token, userId, role }) {
               ]
             : [
                 { id: "docket", label: "My Case" },
+                { id: "roster", label: "Roster" },
                 { id: "calendar", label: "Calendar" },
               ]
         }
       />
 
-      {tab === "roster" && role === "jail_officer" && <RosterTab onOpenCase={openCaseFromElsewhere} token={token} />}
+      {tab === "roster" && <RosterTab onOpenCase={openCaseFromElsewhere} token={token} />}
       {tab === "scan" && role === "jail_officer" && <IntakeScan token={token} onCaseCreated={openCaseFromElsewhere} />}
       {tab === "calendar" && <CalendarTab token={token} userId={userId} />}
 
@@ -152,7 +314,8 @@ export default function LegalAidDashboard({ token, userId, role }) {
               placeholder="e.g. case-001"
               style={{
                 fontFamily: FONTS.mono, fontSize: 13, padding: "10px 14px",
-                border: `1px solid ${TOKENS.rule}`, background: "white", flex: 1, maxWidth: 320,
+                border: `1px solid ${TOKENS.rule}`, borderRadius: 2, background: TOKENS.paper,
+                color: TOKENS.ink, flex: 1, maxWidth: 320,
               }}
             />
             <ActionButton onClick={() => loadCase()} disabled={loading}>
@@ -173,7 +336,11 @@ export default function LegalAidDashboard({ token, userId, role }) {
               )}
 
               {result && (
-                <div style={{ display: "flex", gap: 28 }}>
+                <div style={{
+                  display: "flex", gap: 28, background: TOKENS.paper,
+                  border: `1px solid ${TOKENS.rule}`, borderRadius: 2, padding: 24,
+                  boxShadow: "0 2px 10px rgba(11, 53, 88, 0.07)",
+                }}>
                   <CaseSeal status={result.eligibility.eligibility_status} />
 
                   <div style={{ flex: 1 }}>
@@ -190,7 +357,7 @@ export default function LegalAidDashboard({ token, userId, role }) {
                       <Eyebrow>Precedent</Eyebrow>
                       {result.precedent.results.map((r) => (
                         <p key={r.citation_id} style={{
-                          fontSize: 14, lineHeight: 1.6, borderLeft: `2px solid ${TOKENS.seal}`,
+                          fontSize: 14, lineHeight: 1.6, borderLeft: `2px solid ${TOKENS.saffron}`,
                           paddingLeft: 12, marginBottom: 10,
                         }}>
                           <em>{r.case_name}</em> — {r.citation_text}
@@ -205,7 +372,7 @@ export default function LegalAidDashboard({ token, userId, role }) {
                       <Eyebrow>Procedural checklist</Eyebrow>
                       {result.procedural.procedural_steps.map((s) => (
                         <div key={s.step_number} style={{ display: "flex", gap: 10, marginBottom: 6 }}>
-                          <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: TOKENS.seal }}>
+                          <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: TOKENS.saffron }}>
                             {String(s.step_number).padStart(2, "0")}
                           </span>
                           <span style={{ fontSize: 14 }}>{s.description}</span>
@@ -215,10 +382,10 @@ export default function LegalAidDashboard({ token, userId, role }) {
 
                     {result.bondWaiver.is_flagged_for_waiver && (
                       <section style={{
-                        borderTop: `2px solid ${TOKENS.seal}`, marginTop: 14,
-                        background: "#FFF9EC", padding: 16,
+                        borderTop: `2px solid ${TOKENS.saffron}`, marginTop: 14,
+                        background: "#FFF6E8", padding: 16,
                       }}>
-                        <Eyebrow color={TOKENS.seal}>⚑ Flagged — indigent bond waiver review</Eyebrow>
+                        <Eyebrow color={TOKENS.saffron}>⚑ Flagged — indigent bond waiver review</Eyebrow>
                         <p style={{ fontSize: 13, color: TOKENS.inkSoft, margin: 0 }}>
                           {result.bondWaiver.reasoning_summary} ({result.bondWaiver.governing_section})
                         </p>

@@ -9,7 +9,7 @@ import { TOKENS, FONTS } from "./components/designSystem";
 function BackBar({ onBack, label, username }) {
   return (
     <div style={{
-      background: TOKENS.ink, padding: "8px 24px",
+      background: TOKENS.ink, padding: "0px 24px",
       display: "flex", alignItems: "center", gap: 12,
     }}>
       <button
@@ -72,7 +72,12 @@ export default function App() {
     if (showLogin) {
       return <Login onLogin={handleLogin} onBack={() => setShowLogin(false)} />;
     }
-    return <Landing onSelectRole={() => setShowLogin(true)} />;
+    // Landing renders two separate entry points: the role cards
+    // (onSelectRole) AND the top-right LOGIN button (onLogin) - both need
+    // to land on the Login screen, so both props have to be passed here.
+    // Only onSelectRole was wired before, which is why the LOGIN button
+    // did nothing when clicked.
+    return <Landing onSelectRole={() => setShowLogin(true)} onLogin={() => setShowLogin(true)} />;
   }
 
   const views = {

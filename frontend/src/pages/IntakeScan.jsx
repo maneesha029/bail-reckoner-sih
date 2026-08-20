@@ -86,8 +86,8 @@ export default function IntakeScan({ token, onCaseCreated }) {
 
       {!result && (
         <div style={{
-          border: `1px dashed ${TOKENS.rule}`, borderRadius: 6, padding: 24,
-          background: "white", maxWidth: 560,
+          border: `1px dashed ${TOKENS.rule}`, borderRadius: 2, padding: 24,
+          background: TOKENS.paper, maxWidth: 560,
         }}>
           <input
             type="file"
@@ -141,7 +141,8 @@ export default function IntakeScan({ token, onCaseCreated }) {
                 style={{
                   display: "block", width: "100%", padding: 10, marginTop: 4,
                   border: `1px solid ${draft[key] ? TOKENS.rule : TOKENS.sealPending}`,
-                  fontFamily: FONTS.body, fontSize: 14,
+                  borderRadius: 2, boxSizing: "border-box",
+                  fontFamily: FONTS.body, fontSize: 14, color: TOKENS.ink,
                 }}
               />
             </div>
@@ -158,10 +159,11 @@ export default function IntakeScan({ token, onCaseCreated }) {
 
       {result && (
         <div style={{
-          marginTop: 24, maxWidth: 560, padding: 20, background: "white",
-          border: `1px solid ${TOKENS.rule}`, borderLeft: `3px solid ${TOKENS.sealEligible}`,
+          marginTop: 24, maxWidth: 560, padding: 20, background: TOKENS.paper,
+          border: `1px solid ${TOKENS.rule}`, borderRadius: 2, borderLeft: `3px solid ${TOKENS.sealEligible}`,
+          boxShadow: "0 2px 10px rgba(11, 53, 88, 0.07)",
         }}>
-          <p style={{ fontFamily: FONTS.display, fontSize: 17, fontWeight: 600, color: TOKENS.ink }}>
+          <p style={{ fontFamily: FONTS.display, fontSize: 17, fontWeight: 600, color: TOKENS.ink, margin: 0 }}>
             {result.action === "charge_appended_to_existing_case"
               ? "Charge added to an existing case"
               : "New case created"}

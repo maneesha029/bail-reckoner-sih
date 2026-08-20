@@ -9,7 +9,7 @@ TRUST_SERVICE_URL = os.getenv("TRUST_SERVICE_URL", "http://localhost:8004")
 SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_SERVER = os.getenv("SMTP_SERVER", SMTP_HOST)
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_PORT = int((os.getenv("SMTP_PORT") or "587").strip())
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 SMTP_ENABLED = os.getenv("SMTP_ENABLED", "false").lower() == "true"

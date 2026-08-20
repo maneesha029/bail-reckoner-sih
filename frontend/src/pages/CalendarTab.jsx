@@ -77,7 +77,7 @@ export default function CalendarTab({ token, userId }) {
           display: "flex", alignItems: "center", gap: 14, padding: "14px 0",
           borderBottom: `1px solid ${TOKENS.rule}`,
         }}>
-          <div style={{ width: 90, fontFamily: FONTS.mono, fontSize: 11, color: TOKENS.seal, flexShrink: 0 }}>
+          <div style={{ width: 90, fontFamily: FONTS.mono, fontSize: 11, color: TOKENS.inkSoft, flexShrink: 0 }}>
             {a.case_id}
           </div>
           <div style={{ flex: 1, fontSize: 14 }}>{a.reason}</div>
