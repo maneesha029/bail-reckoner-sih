@@ -91,6 +91,95 @@ function WavingFlag({ height = 34 }) {
   );
 }
 
+// ─── Chakra watermark — a large, near-invisible Ashoka Chakra sitting
+// behind the role cards, now with a faint saffron wash above it and a
+// faint green wash below it (echoing the flag's tricolour). Both washes
+// sit in their own SVG layer, well under the chakra's z-index, and use
+// radial gradients fading to transparent so there's no hard edge.
+// Purely decorative (aria-hidden), reuses the same 24-spoke construction
+// as WavingFlag's badge but static and much bigger. Positioned absolutely
+// within a `position: relative` ancestor so it never affects document
+// flow or card layout. ───
+function ChakraWatermark({ size = 640 }) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.42;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        pointerEvents: "none",
+        opacity: 0.05,
+        zIndex: 0,
+      }}
+    >
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={TOKENS.chakra} strokeWidth={size * 0.06} />
+      <circle cx={cx} cy={cy} r={r * 0.06} fill="none" stroke={TOKENS.chakra} strokeWidth={size * 0.006} />
+      {Array.from({ length: 24 }).map((_, i) => {
+        const angle = (i * 360) / 24;
+        const x2 = cx + r * Math.cos((angle * Math.PI) / 180);
+        const y2 = cy + r * Math.sin((angle * Math.PI) / 180);
+        return (
+          <line
+            key={i}
+            x1={cx}
+            y1={cy}
+            x2={x2}
+            y2={y2}
+            stroke={TOKENS.chakra}
+            strokeWidth={size * 0.003}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+// ─── Full-bleed tricolour wash — sits behind everything in the hero
+// section, spanning the entire page width (not just the chakra's
+// bounding box). Saffron fades in from the top edge, green fades in
+// from the bottom edge, both to fully transparent at ~55% height so
+// they never meet or muddy in the middle. Purely decorative. ───
+function HeroWash() {
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "55%",
+          background: `linear-gradient(180deg, ${TOKENS.saffron}0D 0%, ${TOKENS.saffron}00 100%)`,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "55%",
+          background: `linear-gradient(0deg, ${TOKENS.green}0D 0%, ${TOKENS.green}00 100%)`,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+    </>
+  );
+}
+
 const ROLES = [
   {
     id: "undertrial",
@@ -238,20 +327,34 @@ function Header({ onLogin }) {
 
 export default function Landing({ onSelectRole, onLogin }) {
   return (
-    <div style={{ background: TOKENS.paper, minHeight: "100vh", fontFamily: FONTS.body }}>
+    <div
+      style={{
+        position: "relative",
+        background: TOKENS.paper,
+        minHeight: "100vh",
+        fontFamily: FONTS.body,
+        overflow: "hidden",
+      }}
+    >
       <style>{`@import url('${FONT_IMPORT_URL}');`}</style>
 
-      <Header onLogin={onLogin} />
+      <HeroWash />
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 24px 80px",
-        }}
-      >
-        <div style={{ maxWidth: 900, width: "100%" }}>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <Header onLogin={onLogin} />
+
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "60px 24px 80px",
+          }}
+        >
+          <ChakraWatermark size={640} />
+
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 900, width: "100%" }}>
           <div
             style={{
               textAlign: "center",
@@ -296,6 +399,7 @@ export default function Landing({ onSelectRole, onLogin }) {
               <RoleCard key={role.id} role={role} onSelect={onSelectRole} />
             ))}
           </div>
+        </div>
         </div>
       </div>
     </div>

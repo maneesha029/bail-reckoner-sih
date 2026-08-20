@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { checkEligibility } from "../api/client";
 
-// ─── Design tokens — identical to Landing.jsx / other dashboards ───
+// ─── Design tokens — identical to Landing.jsx / other dashboards, plus a
+// warmer background specific to this page (see note below TOKENS). ───
 const TOKENS = {
   paper: "#FFFFFF",
   navy: "#0B3558",
@@ -14,6 +15,12 @@ const TOKENS = {
   green: "#0F7A32",
   gold: "#B8860B",
   danger: "#B3261E",
+  // This page is read by undertrials and their families, often on a phone,
+  // often under real stress. Pure white reads clinical; a soft cream wash
+  // is calmer without sacrificing legibility. Kept local to this file
+  // rather than added to the shared TOKENS, since it's a deliberate
+  // exception, not a system-wide value.
+  warmBg: "#FFFBF5",
 };
 
 const FONTS = {
@@ -97,8 +104,12 @@ export default function UndertrialView({ token, caseId }) {
   }, [caseId, token]);
 
   return (
-    <div style={{ background: TOKENS.paper, minHeight: "100vh", fontFamily: FONTS.body, color: TOKENS.ink }}>
+    <div style={{ background: TOKENS.warmBg, minHeight: "100vh", fontFamily: FONTS.body, color: TOKENS.ink }}>
       <style>{`@import url('${FONT_IMPORT_URL}');`}</style>
+
+      {/* Thin saffron→green hairline, echoing the flag, as the only
+          decorative touch on an otherwise plain page. */}
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${TOKENS.saffron}, ${TOKENS.paper} 50%, ${TOKENS.green})` }} />
 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0px 24px 40px" }}>
         <h1 style={{ fontFamily: FONTS.display, fontSize: 26, fontWeight: 700, marginTop: 20, marginBottom: 6, color: TOKENS.ink }}>
@@ -115,6 +126,7 @@ export default function UndertrialView({ token, caseId }) {
           <div
             style={{
               textAlign: "center",
+              background: TOKENS.paper,
               border: `1px solid ${TOKENS.rule}`,
               borderTop: `4px solid ${TOKENS.navy}`,
               borderRadius: 2,
