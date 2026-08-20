@@ -39,3 +39,4 @@ logfile
 services/trust-access-layer/test_http.py
 .claude/
 services/monitoring-engine/celerybeat-schedule*
+diff-*.txt
