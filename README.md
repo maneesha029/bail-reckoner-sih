@@ -131,8 +131,6 @@ The legal reference material is real. The case records are synthetic — real un
 
 ## Quick start
 
-See `docs/RUN_AND_PITCH.md` for the full command sequence, demo script, and login credentials.
-
 ```powershell
 docker-compose up --build -d postgres redis chroma
 docker-compose up --build -d
