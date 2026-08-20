@@ -6,7 +6,7 @@
 
 An automated eligibility, precedent, and audit system for undertrial bail review under Section 436A of the CrPC (Section 479 of the BNSS) — built for judges, legal aid providers, and undertrial prisoners.
 
-**76% of India's prison population are undertrials, not convicts. This is the system that finds the ones who already qualify for release — automatically, continuously, and provably.**
+**72.6% of India's prison population are undertrials, not convicts. This is the system that finds the ones who already qualify for release — automatically, continuously, and provably.**
 
 > This system does not grant bail and makes no recommendation. It surfaces verified legal signals — eligibility, precedent, procedure, and discretion factors — for a human authority to review. The final decision always rests with the judge.
 
@@ -22,7 +22,7 @@ drop the PNG in, then uncomment the line below with your filename:
 
 ## The problem
 
-Undertrials make up **76% of India's entire prison population** (NCRB, Prison Statistics India 2023). An undertrial who has served half their maximum possible sentence — one-third if it's a first offense — is legally entitled to release under Section 436A/479. In practice, this depends entirely on someone manually noticing. Nobody tracks it at scale.
+Undertrials make up **72.6% of India's entire prison population** (NCRB, Prison Statistics India 2024). An undertrial who has served half their maximum possible sentence — one-third if it's a first offense — is legally entitled to release under Section 436A/479. In practice, this depends entirely on someone manually noticing. Nobody tracks it at scale.
 
 ## What this does
 
