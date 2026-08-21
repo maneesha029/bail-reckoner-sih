@@ -4,6 +4,7 @@ import {
   overrideEligibility, getAuditLog,
 } from "../api/client";
 import RosterTab from "./RosterTab";
+import CalendarTab from "./CalendarTab";
 
 // ─── Design tokens — identical to Landing.jsx / LegalAidDashboard.jsx ───
 const TOKENS = {
@@ -306,10 +307,12 @@ export default function JudgeDashboard({ token, userId, role }) {
         tabs={[
           { id: "reference", label: "Case Reference" },
           { id: "roster", label: "Roster" },
+          { id: "calendar", label: "Calendar" },
         ]}
       />
 
       {tab === "roster" && <RosterTab onOpenCase={openCaseFromElsewhere} token={token} />}
+      {tab === "calendar" && <CalendarTab token={token} userId={userId} />}
 
       {tab === "reference" && (
         <>

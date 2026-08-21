@@ -116,7 +116,7 @@ function ChakraWatermark({ size = 640 }) {
         left: "50%",
         transform: "translate(-50%, -50%)",
         pointerEvents: "none",
-        opacity: 0.05,
+        opacity: 0.3,
         zIndex: 0,
       }}
     >

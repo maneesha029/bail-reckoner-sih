@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { checkEligibility, searchPrecedent, getProceduralRequirements, checkBondWaiver, getAuditLog } from "../api/client";
-import RosterTab from "./RosterTab";
 import CalendarTab from "./CalendarTab";
 import IntakeScan from "./IntakeScan";
 
@@ -191,7 +190,7 @@ function Docket({ cases, activeId, onSelect }) {
   );
 }
 
-// NEW: was only ever built into JudgeDashboard - legal aid/officers need to
+// Was only ever built into JudgeDashboard - legal aid/officers need to
 // see the same decision history, especially the judge's manual_override
 // entries. Without it this role has no way to know a decision was made.
 function AuditHistory({ entries }) {
@@ -220,7 +219,6 @@ function AuditHistory({ entries }) {
   );
 }
 
-// export default function LegalAidDashboard({ token, userId }) {
 export default function LegalAidDashboard({ token, userId, role }) {
   const [tab, setTab] = useState("docket");
   const [caseId, setCaseId] = useState("");
@@ -264,6 +262,8 @@ export default function LegalAidDashboard({ token, userId, role }) {
     }
   };
 
+  // Still needed even with Roster gone: IntakeScan calls this once a new
+  // case is confirmed, to jump straight to it in the Docket tab.
   const openCaseFromElsewhere = (id) => {
     setTab("docket");
     loadCase(id);
@@ -290,19 +290,16 @@ export default function LegalAidDashboard({ token, userId, role }) {
           role === "jail_officer"
             ? [
                 { id: "docket", label: "Docket" },
-                { id: "roster", label: "Roster" },
                 { id: "scan", label: "Scan FIR" },
                 { id: "calendar", label: "Calendar" },
               ]
             : [
                 { id: "docket", label: "My Case" },
-                { id: "roster", label: "Roster" },
                 { id: "calendar", label: "Calendar" },
               ]
         }
       />
 
-      {tab === "roster" && <RosterTab onOpenCase={openCaseFromElsewhere} token={token} />}
       {tab === "scan" && role === "jail_officer" && <IntakeScan token={token} onCaseCreated={openCaseFromElsewhere} />}
       {tab === "calendar" && <CalendarTab token={token} userId={userId} />}
 
@@ -331,7 +328,7 @@ export default function LegalAidDashboard({ token, userId, role }) {
             <div>
               {!result && !loading && (
                 <p style={{ color: TOKENS.inkSoft, fontStyle: "italic" }}>
-                  No case open. Enter a case ID above, or pick someone from the Roster tab.
+                  No case open. Enter a case ID above to get started.
                 </p>
               )}
 
@@ -392,9 +389,6 @@ export default function LegalAidDashboard({ token, userId, role }) {
                       </section>
                     )}
 
-                    {/* NEW: this section didn't exist before - it's the whole
-                        point of this fix. Shows the judge's decision (and
-                        every system check) to the legal aid / officer role. */}
                     <section style={{ borderTop: `1px solid ${TOKENS.rule}`, paddingTop: 20, marginTop: 24 }}>
                       <Eyebrow>Recorded actions on this case</Eyebrow>
                       <AuditHistory entries={auditEntries} />
